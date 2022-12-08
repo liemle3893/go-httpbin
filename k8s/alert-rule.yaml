@@ -1,0 +1,212 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: go-httpbin
+  namespace: liemlhd-monitoring-demo-dev
+spec:
+  groups:
+    - name: SLOs-myapp_request_seconds_count
+      rules:
+        - alert: ErrorBudgetBurn
+          annotations:
+            message: "High error budget burn for job=prometheus (current value: {{ $value }})"
+          expr: |
+            sum(myapp_request_seconds_count:burnrate5m{job="prometheus"}) > (14.40 * (1-0.99900))
+            and
+            sum(myapp_request_seconds_count:burnrate1h{job="prometheus"}) > (14.40 * (1-0.99900))
+          for: 2m
+          labels:
+            job: prometheus
+            severity: critical
+        - alert: ErrorBudgetBurn
+          annotations:
+            message: "High error budget burn for job=prometheus (current value: {{ $value }})"
+          expr: |
+            sum(myapp_request_seconds_count:burnrate30m{job="prometheus"}) > (6.00 * (1-0.99900))
+            and
+            sum(myapp_request_seconds_count:burnrate6h{job="prometheus"}) > (6.00 * (1-0.99900))
+          for: 15m
+          labels:
+            job: prometheus
+            severity: critical
+        - alert: ErrorBudgetBurn
+          annotations:
+            message: "High error budget burn for job=prometheus (current value: {{ $value }})"
+          expr: |
+            sum(myapp_request_seconds_count:burnrate2h{job="prometheus"}) > (3.00 * (1-0.99900))
+            and
+            sum(myapp_request_seconds_count:burnrate1d{job="prometheus"}) > (3.00 * (1-0.99900))
+          for: 1h
+          labels:
+            job: prometheus
+            severity: warning
+        - alert: ErrorBudgetBurn
+          annotations:
+            message: "High error budget burn for job=prometheus (current value: {{ $value }})"
+          expr: |
+            sum(myapp_request_seconds_count:burnrate6h{job="prometheus"}) > (1.00 * (1-0.99900))
+            and
+            sum(myapp_request_seconds_count:burnrate3d{job="prometheus"}) > (1.00 * (1-0.99900))
+          for: 3h
+          labels:
+            job: prometheus
+            severity: warning
+        - expr: |
+            sum(rate(myapp_request_seconds_count{job="prometheus",code=~"5.."}[1d]))
+            /
+            sum(rate(myapp_request_seconds_count{job="prometheus"}[1d]))
+          labels:
+            job: prometheus
+          record: myapp_request_seconds_count:burnrate1d
+        - expr: |
+            sum(rate(myapp_request_seconds_count{job="prometheus",code=~"5.."}[1h]))
+            /
+            sum(rate(myapp_request_seconds_count{job="prometheus"}[1h]))
+          labels:
+            job: prometheus
+          record: myapp_request_seconds_count:burnrate1h
+        - expr: |
+            sum(rate(myapp_request_seconds_count{job="prometheus",code=~"5.."}[2h]))
+            /
+            sum(rate(myapp_request_seconds_count{job="prometheus"}[2h]))
+          labels:
+            job: prometheus
+          record: myapp_request_seconds_count:burnrate2h
+        - expr: |
+            sum(rate(myapp_request_seconds_count{job="prometheus",code=~"5.."}[30m]))
+            /
+            sum(rate(myapp_request_seconds_count{job="prometheus"}[30m]))
+          labels:
+            job: prometheus
+          record: myapp_request_seconds_count:burnrate30m
+        - expr: |
+            sum(rate(myapp_request_seconds_count{job="prometheus",code=~"5.."}[3d]))
+            /
+            sum(rate(myapp_request_seconds_count{job="prometheus"}[3d]))
+          labels:
+            job: prometheus
+          record: myapp_request_seconds_count:burnrate3d
+        - expr: |
+            sum(rate(myapp_request_seconds_count{job="prometheus",code=~"5.."}[5m]))
+            /
+            sum(rate(myapp_request_seconds_count{job="prometheus"}[5m]))
+          labels:
+            job: prometheus
+          record: myapp_request_seconds_count:burnrate5m
+        - expr: |
+            sum(rate(myapp_request_seconds_count{job="prometheus",code=~"5.."}[6h]))
+            /
+            sum(rate(myapp_request_seconds_count{job="prometheus"}[6h]))
+          labels:
+            job: prometheus
+          record: myapp_request_seconds_count:burnrate6h
+    - name: SLOs-myapp_request_seconds
+      rules:
+        - alert: LatencyBudgetBurn
+          annotations:
+            message: "High requests latency budget burn for job=prometheus,latency=0.10000000000000001 (current value: {{ $value }})"
+          expr: |
+            (
+              latencytarget:myapp_request_seconds:rate1h{job="prometheus",latency="0.10000000000000001"} > (14.4*1.000000)
+              and
+              latencytarget:myapp_request_seconds:rate5m{job="prometheus",latency="0.10000000000000001"} > (14.4*1.000000)
+            )
+            or
+            (
+              latencytarget:myapp_request_seconds:rate6h{job="prometheus",latency="0.10000000000000001"} > (6*1.000000)
+              and
+              latencytarget:myapp_request_seconds:rate30m{job="prometheus",latency="0.10000000000000001"} > (6*1.000000)
+            )
+          labels:
+            job: prometheus
+            latency: "0.10000000000000001"
+            severity: critical
+        - alert: LatencyBudgetBurn
+          annotations:
+            message: "High requests latency budget burn for job=prometheus,latency=0.10000000000000001 (current value: {{ $value }})"
+          expr: |
+            (
+              latencytarget:myapp_request_seconds:rate1d{job="prometheus",latency="0.10000000000000001"} > (3*1.000000)
+              and
+              latencytarget:myapp_request_seconds:rate2h{job="prometheus",latency="0.10000000000000001"} > (3*1.000000)
+            )
+            or
+            (
+              latencytarget:myapp_request_seconds:rate3d{job="prometheus",latency="0.10000000000000001"} > (1.000000)
+              and
+              latencytarget:myapp_request_seconds:rate6h{job="prometheus",latency="0.10000000000000001"} > (1.000000)
+            )
+          labels:
+            job: prometheus
+            latency: "0.10000000000000001"
+            severity: warning
+        - expr: |
+            1 - (
+              sum(rate(myapp_request_seconds_bucket{job="prometheus",le="0.10000000000000001",code!~"5.."}[5m]))
+              /
+              sum(rate(myapp_request_seconds_count{job="prometheus"}[5m]))
+            )
+          labels:
+            job: prometheus
+            latency: "0.10000000000000001"
+          record: latencytarget:myapp_request_seconds:rate5m
+        - expr: |
+            1 - (
+              sum(rate(myapp_request_seconds_bucket{job="prometheus",le="0.10000000000000001",code!~"5.."}[30m]))
+              /
+              sum(rate(myapp_request_seconds_count{job="prometheus"}[30m]))
+            )
+          labels:
+            job: prometheus
+            latency: "0.10000000000000001"
+          record: latencytarget:myapp_request_seconds:rate30m
+        - expr: |
+            1 - (
+              sum(rate(myapp_request_seconds_bucket{job="prometheus",le="0.10000000000000001",code!~"5.."}[1h]))
+              /
+              sum(rate(myapp_request_seconds_count{job="prometheus"}[1h]))
+            )
+          labels:
+            job: prometheus
+            latency: "0.10000000000000001"
+          record: latencytarget:myapp_request_seconds:rate1h
+        - expr: |
+            1 - (
+              sum(rate(myapp_request_seconds_bucket{job="prometheus",le="0.10000000000000001",code!~"5.."}[2h]))
+              /
+              sum(rate(myapp_request_seconds_count{job="prometheus"}[2h]))
+            )
+          labels:
+            job: prometheus
+            latency: "0.10000000000000001"
+          record: latencytarget:myapp_request_seconds:rate2h
+        - expr: |
+            1 - (
+              sum(rate(myapp_request_seconds_bucket{job="prometheus",le="0.10000000000000001",code!~"5.."}[6h]))
+              /
+              sum(rate(myapp_request_seconds_count{job="prometheus"}[6h]))
+            )
+          labels:
+            job: prometheus
+            latency: "0.10000000000000001"
+          record: latencytarget:myapp_request_seconds:rate6h
+        - expr: |
+            1 - (
+              sum(rate(myapp_request_seconds_bucket{job="prometheus",le="0.10000000000000001",code!~"5.."}[1d]))
+              /
+              sum(rate(myapp_request_seconds_count{job="prometheus"}[1d]))
+            )
+          labels:
+            job: prometheus
+            latency: "0.10000000000000001"
+          record: latencytarget:myapp_request_seconds:rate1d
+        - expr: |
+            1 - (
+              sum(rate(myapp_request_seconds_bucket{job="prometheus",le="0.10000000000000001",code!~"5.."}[3d]))
+              /
+              sum(rate(myapp_request_seconds_count{job="prometheus"}[3d]))
+            )
+          labels:
+            job: prometheus
+            latency: "0.10000000000000001"
+          record: latencytarget:myapp_request_seconds:rate3d

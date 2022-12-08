@@ -1,0 +1,17 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: go-httpbin-1
+  namespace: liemlhd-monitoring-demo-dev
+spec:
+  endpoints:
+    - path: /metrics
+      port: http
+      scheme: http
+      interval: 15s
+  namespaceSelector:
+    matchNames:
+      - liemlhd-monitoring-demo-dev
+  selector:
+    matchLabels:
+      app: liemlhd-monitoring-demo-dev-1

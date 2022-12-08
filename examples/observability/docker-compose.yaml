@@ -1,0 +1,44 @@
+version: '3.7'
+services:
+  mysqld:
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-p123456" ]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    image: mysql:8.0
+    platform: linux/amd64
+    logging:
+      options:
+        max-size: 10m
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=123456
+    volumes:
+      # Avoid writable bind mount
+      - "./.bin/assets/mysql:/docker-entrypoint-initdb.d"
+    restart: always
+  jaeger:
+    image: jaegertracing/all-in-one:1.29
+    platform: linux/amd64
+    logging:
+      options:
+        max-size: 10m
+    ports:
+      - "6831:6831/udp"
+      - "14268:14268"
+      - "16686:16686"
+  redis:
+    image: redis:6
+    platform: linux/amd64
+    logging:
+      options:
+        max-size: 10m
+    ports:
+      - "6379:6379"
+
+
+networks:
+  intranet:
