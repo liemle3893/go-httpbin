@@ -1,5 +1,7 @@
 # go-httpbin
 
+A clone of [github.com/mccutchen/go-httpbin](github.com/mccutchen/go-httpbin) with some code for demo purpose.
+
 A reasonably complete and well-tested golang port of [Kenneth Reitz][kr]'s
 [httpbin][httpbin-org] service, with zero dependencies outside the go stdlib.
 
